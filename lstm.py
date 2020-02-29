@@ -97,7 +97,7 @@ def trained_model(dataset,word2id,max_words,label2id):
     # print(model.summary())
 
     # Train model 
-    model.fit(X, Y, epochs=2, batch_size=128, validation_split=0.1, shuffle=True)
+    model.fit(X, Y, epochs=20, batch_size=128, validation_split=0.1, shuffle=True)
 
     # 将整个模型保存为HDF5文件
     model.save('lstm_model.h5')
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     
 
     #Loading the dataset, preprocessing
-    dataset = pd.read_csv('data/nCoV_100k_train.labled.csv',encoding='ansi')
+    dataset = pd.read_csv('nCoV_100k_train.labled.csv',encoding='utf-8')
     dataset.dropna(axis=0,inplace=True)
     noise_index = dataset[(dataset['情感倾向'] != '1') & (dataset['情感倾向'] != '0') &(dataset['情感倾向'] != '-1') ].index
     dataset.drop(noise_index,inplace=True)
@@ -143,7 +143,7 @@ if __name__ == "__main__":
     model = trained_model(dataset,word2id,max_words,label2id)
 
     print("predicting...")
-    testset = pd.read_csv('data/nCoV_10k_test.csv',encoding='ansi')
+    testset = pd.read_csv('nCoV_10k_test.csv',encoding='utf-8')
     result = prediction(testset,'lstm_model.h5',word2id,max_words,id2label)
     #write result
     result.to_csv('DMIRLAB-final.csv',encoding='utf-8',index=False)
