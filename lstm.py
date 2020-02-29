@@ -9,26 +9,37 @@ import tensorflow.keras as keras
 
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
-def encode_word(dataset):
+def encode_word(dataset,testset):
 
-    input_sentences = dataset["微博中文内容"].values.tolist()#目前只要微博内容一个信息，其他信息暂时不用
-    labels = dataset["情感倾向"].values.tolist()
 
     word2id = dict()
-    label2id = dict()
-    
-
-    label2id = {'-1': 0, '0': 1, '1': 2} #{l: i for i, l in enumerate(set(labels))}
-    
+    input_sentences = dataset["微博中文内容"].values.tolist()#目前只要微博内容一个信息，其他信息暂时不用
+        
     for sentence in input_sentences:
         for word in sentence:
-            # Add words to word2id dict if not exist
-            if word not in word2id:
-                word2id[word] = len(word2id)
+                # Add words to word2id dict if not exist
+                if word not in word2id:
+                    word2id[word] = len(word2id)
+    print(len(word2id))
+    # 发现测试集中存在dataset没有的文字，所以把testset也加入 word2id dict。
+    input_sentences = testset["微博中文内容"].values.tolist()#目前只要微博内容一个信息，其他信息暂时不用
+        
+    for sentence in input_sentences:
+        for word in sentence:
+                # Add words to word2id dict if not exist
+                if word not in word2id:
+                    word2id[word] = len(word2id)
+    
+    print(len(word2id))
+    labels = dataset["情感倾向"].values.tolist()
+    label2id = dict()
+
     
     id2label = {0: '-1', 1: '0', 2: '1'} #{v: k for k, v in label2id.items()} 
+    
+    label2id = {'-1': 0, '0': 1, '1': 2} #{l: i for i, l in enumerate(set(labels))}
 
-    max_words = dataset['微博中文内容'].str.len().max() 
+    max_words = max(dataset['微博中文内容'].str.len().max(),testset['微博中文内容'].str.len().max())
 
     return word2id,max_words,label2id,id2label# maximum number of words in a sentence 
 
@@ -97,7 +108,7 @@ def trained_model(dataset,word2id,max_words,label2id):
     # print(model.summary())
 
     # Train model 
-    model.fit(X, Y, epochs=20, batch_size=128, validation_split=0.1, shuffle=True)
+    model.fit(X, Y, epochs=10, batch_size=128, validation_split=0.1, shuffle=True)
 
     # 将整个模型保存为HDF5文件
     model.save('lstm_model.h5')
@@ -138,12 +149,14 @@ if __name__ == "__main__":
     dataset.drop(noise_index,inplace=True)
     print("training...")
     
-    word2id, max_words,label2id,id2label = encode_word(dataset)
+    testset = pd.read_csv('nCoV_10k_test.csv',encoding='utf-8')
+    testset.dropna(axis=0,inplace=True)
+    word2id, max_words,label2id,id2label = encode_word(dataset,testset)
     
     model = trained_model(dataset,word2id,max_words,label2id)
 
     print("predicting...")
-    testset = pd.read_csv('nCoV_10k_test.csv',encoding='utf-8')
+
     result = prediction(testset,'lstm_model.h5',word2id,max_words,id2label)
     #write result
     result.to_csv('DMIRLAB-final.csv',encoding='utf-8',index=False)
