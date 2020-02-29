@@ -108,7 +108,7 @@ def trained_model(dataset ,word2id ,max_words ,label2id):
     # print(model.summary())
 
     # Train model 
-    model.fit(X , Y , epochs=50 , batch_size=128 , validation_split=0.1 , shuffle=True)
+    model.fit(X , Y , epochs=1 , batch_size=128 , validation_split=0.1 , shuffle=True)
 
     # 将整个模型保存为HDF5文件
     model.save('lstm_model.h5')
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     testset.dropna(axis=0 ,inplace=True)
     word2id , max_words ,label2id ,id2label = encode_word(dataset ,testset)
     
-    # model = trained_model(dataset ,word2id ,max_words ,label2id)
+    model = trained_model(dataset ,word2id ,max_words ,label2id)
 
     print("predicting...")
 
