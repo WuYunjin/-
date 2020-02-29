@@ -97,7 +97,7 @@ def trained_model(dataset,word2id,max_words,label2id):
     # print(model.summary())
 
     # Train model 
-    model.fit(X, Y, epochs=50, batch_size=128, validation_split=0.1, shuffle=True)
+    model.fit(X, Y, epochs=2, batch_size=128, validation_split=0.1, shuffle=True)
 
     # 将整个模型保存为HDF5文件
     model.save('lstm_model.h5')
